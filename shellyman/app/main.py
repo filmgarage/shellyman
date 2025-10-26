@@ -2,7 +2,12 @@ import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
-from routers import security, devices  # absolute import
+from .routers import security, devices  # absolute import
+
+import sys, os
+print("SYS.PATH=", sys.path)
+print("MAIN FILE=", __file__)
+print("DIR LIST=", os.listdir(os.path.dirname(__file__)))
 
 PORT = int(os.getenv("PORT", "8099"))
 
