@@ -1,7 +1,7 @@
 name: "Shellyman"
 slug: "shellyman"
 description: "Ingress add-on for Shelly device management (auth, bulk ops). English UI."
-version: "0.2.0"
+version: "0.2.1"
 url: "https://github.com/filmgarage/shellyman"
 arch:
   - amd64
@@ -12,6 +12,7 @@ host_network: true
 ingress: true
 ingress_port: 8099
 panel_icon: "mdi:tools"
+image: "ghcr.io/filmgarage/{arch}-addon-shellyman"
 options:
   ha_token: ""                # Long-lived HA token (required for WS)
   hass_ws_url: "ws://supervisor/core/websocket"  # Default works in add-ons
