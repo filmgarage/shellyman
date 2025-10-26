@@ -1,7 +1,6 @@
 {
   "name": "Shellyman Add-on",
   "url": "https://github.com/filmgarage/shellyman",
-  "maintainer": "Your Name <you@example.com>",
   "arch": [
     "amd64",
     "aarch64"
