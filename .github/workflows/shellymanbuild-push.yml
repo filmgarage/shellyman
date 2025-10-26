@@ -50,7 +50,10 @@ jobs:
           echo "VER=$VER" >> $GITHUB_OUTPUT
           echo "IMAGE=$IMAGE" >> $GITHUB_OUTPUT
           echo "IMAGE_LATEST=$IMAGE_LATEST" >> $GITHUB_OUTPUT
-
+          
+      - name: Debug build context
+        run: ls -R ./shellyman
+        
       - name: Build & Push (${{ matrix.arch }})
         uses: docker/build-push-action@v6
         with:
