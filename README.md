@@ -1,6 +1,6 @@
 # Shellyman Add-on (Ingress)
 
-English-only UI and code comments. Lets Home Assistant handle discovery; this add-on focuses on **management** (auth on/off, bulk ops, firmware next).
+Home Assistant handles discovery; this add-on focuses on **management** (auth on/off, bulk ops, firmware next).
 
 ## Install (as local add-on repo)
 1. Push this repo to GitHub.
