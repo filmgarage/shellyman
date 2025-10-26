@@ -1,0 +1,60 @@
+name: Build & Push Shellyman Add-on (tagged releases)
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'   # build only on semantic-like tags, e.g., v0.2.2
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [ amd64, aarch64 ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Derive version from tag
+        id: meta
+        run: |
+          # Extract version from the pushed tag (refs/tags/vX.Y.Z)
+          RAW="${GITHUB_REF##*/}"
+          VER="${RAW#v}"
+          echo "VER=$VER" >> $GITHUB_OUTPUT
+          echo "IMAGE_AMD=ghcr.io/filmgarage/amd64-addon-shellyman:$VER" >> $GITHUB_OUTPUT
+          echo "IMAGE_ARM=ghcr.io/filmgarage/aarch64-addon-shellyman:$VER" >> $GITHUB_OUTPUT
+          echo "IMAGE_AMD_LATEST=ghcr.io/filmgarage/amd64-addon-shellyman:latest" >> $GITHUB_OUTPUT
+          echo "IMAGE_ARM_LATEST=ghcr.io/filmgarage/aarch64-addon-shellyman:latest" >> $GITHUB_OUTPUT
+
+      - name: Build & Push (${{ matrix.arch }})
+        uses: docker/build-push-action@v6
+        with:
+          context: ./shellyman
+          file: ./shellyman/Dockerfile
+          platforms: linux/${{ matrix.arch }}
+          push: true
+          tags: |
+            ${{ matrix.arch == 'amd64' && steps.meta.outputs.IMAGE_AMD || steps.meta.outputs.IMAGE_ARM }}
+            ${{ matrix.arch == 'amd64' && steps.meta.outputs.IMAGE_AMD_LATEST || steps.meta.outputs.IMAGE_ARM_LATEST }}
+          cache-from: type=registry,ref=ghcr.io/filmgarage/cache-shellyman:${{ matrix.arch }}
+          cache-to: type=registry,ref=ghcr.io/filmgarage/cache-shellyman:${{ matrix.arch }},mode=max
