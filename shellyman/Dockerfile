@@ -14,6 +14,9 @@ RUN python3 -m venv /venv  && /venv/bin/python -m pip install --no-cache-dir --u
 # App code
 COPY app/ /app/
 COPY static/ /app/static/
+
+RUN touch /app/__init__.py
+
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 
