@@ -2,4 +2,4 @@
 set -euo pipefail
 
 export PORT="${INGRESS_PORT:-8099}"
-exec /venv/bin/python -m app.main
+exec /venv/bin/python -m app.app.main
