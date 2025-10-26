@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shellyman</title>
+  <script type="module" src="https://unpkg.com/@material/web@1.4.0/all.js"></script>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Shellyman</h1>
+    <div class="actions">
+      <md-filled-tonal-button id="btn-refresh"><md-icon>refresh</md-icon>Refresh</md-filled-tonal-button>
+      <md-filled-button id="btn-enable-auth" disabled>Enable Auth</md-filled-button>
+      <md-outlined-button id="btn-disable-auth" disabled>Disable Auth</md-outlined-button>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <md-outlined-text-field id="filter" label="Filter (name, IP, model)" type="text" trailing-icon>
+      <md-icon slot="trailing-icon">search</md-icon>
+    </md-outlined-text-field>
+  </section>
+
+  <section class="table-wrap">
+    <table id="devices-table">
+      <thead>
+        <tr>
+          <th class="checkbox-col"><md-checkbox id="check-all"></md-checkbox></th>
+          <th data-sort="name">Name</th>
+          <th data-sort="model">Model</th>
+          <th data-sort="gen">Gen</th>
+          <th data-sort="protocol">Protocol</th>
+          <th data-sort="firmware_uptodate">Firmware</th>
+          <th data-sort="ip">IP Address</th>
+          <th data-sort="auth_enabled">Authentication</th>
+        </tr>
+      </thead>
+      <tbody id="devices-tbody"></tbody>
+    </table>
+  </section>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
