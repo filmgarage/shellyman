@@ -1,7 +1,7 @@
 name: "Shellyman"
 slug: "shellyman"
 description: "Ingress add-on for Shelly device management (auth, bulk ops). English UI."
-version: "0.2.11"
+version: "0.2.12"
 url: "https://github.com/filmgarage/shellyman"
 arch:
   - amd64
