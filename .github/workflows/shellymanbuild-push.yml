@@ -3,7 +3,7 @@ name: Build & Push Shellyman Add-on (tagged releases)
 on:
   push:
     tags:
-      - 'v*.*.*'   # build only on semantic-like tags, e.g., v0.2.2 or v0.2.2-alpha
+      - 'v*.*.*'   # build only on tags (e.g., v0.2.3 or v0.2.3-alpha)
   workflow_dispatch:
 
 jobs:
@@ -40,23 +40,14 @@ jobs:
           ARCH: ${{ matrix.arch }}
         shell: bash
         run: |
-          # Extract raw ref name (e.g., v0.2.1-alpha)
-          RAW="${GITHUB_REF##*/}"
-          # Strip leading 'v' (optional) and any accidental leading dot
-          VER="${RAW#v}"
-          VER="${VER#.}"
-          # Basic sanitization: allow [A-Za-z0-9_.-]
-          if [[ ! "$VER" =~ ^[A-Za-z0-9_.-]+$ ]]; then
-            echo "Invalid version string after parsing: '$VER'"
-            exit 1
-          fi
-          if [ -z "$VER" ]; then
-            echo "Version string empty after parsing"
-            exit 1
-          fi
-          echo "Using version: $VER"
+          RAW="${GITHUB_REF##*/}"       # e.g. v0.2.3-alpha
+          VER="${RAW#v}"                # 0.2.3-alpha
+          VER="${VER#.}"                # guard stray leading dot
+          if [[ -z "$VER" ]]; then echo "Empty version"; exit 1; fi
+          if [[ ! "$VER" =~ ^[A-Za-z0-9_.-]+$ ]]; then echo "Bad version: $VER"; exit 1; fi
           IMAGE="ghcr.io/filmgarage/${ARCH}-addon-shellyman:${VER}"
           IMAGE_LATEST="ghcr.io/filmgarage/${ARCH}-addon-shellyman:latest"
+          echo "VER=$VER" >> $GITHUB_OUTPUT
           echo "IMAGE=$IMAGE" >> $GITHUB_OUTPUT
           echo "IMAGE_LATEST=$IMAGE_LATEST" >> $GITHUB_OUTPUT
 
@@ -67,6 +58,8 @@ jobs:
           file: ./shellyman/Dockerfile
           platforms: linux/${{ matrix.arch }}
           push: true
+          build-args: |
+            BUILD_FROM=ghcr.io/home-assistant/${{ matrix.arch }}-base:latest
           tags: |
             ${{ steps.meta.outputs.IMAGE }}
             ${{ steps.meta.outputs.IMAGE_LATEST }}
