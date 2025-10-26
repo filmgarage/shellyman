@@ -54,7 +54,7 @@ jobs:
       - name: Build & Push (${{ matrix.arch }})
         uses: docker/build-push-action@v6
         with:
-          context: ./shellyman
+          context: .
           file: ./shellyman/Dockerfile
           platforms: linux/${{ matrix.arch }}
           push: true
