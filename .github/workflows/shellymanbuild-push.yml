@@ -3,7 +3,7 @@ name: Build & Push Shellyman Add-on (tagged releases)
 on:
   push:
     tags:
-      - 'v*.*.*'   # build only on semantic-like tags, e.g., v0.2.2
+      - 'v*.*.*'   # build only on semantic-like tags, e.g., v0.2.2 or v0.2.2-alpha
   workflow_dispatch:
 
 jobs:
@@ -34,17 +34,31 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Derive version from tag
+      - name: Derive version/tag and images
         id: meta
+        env:
+          ARCH: ${{ matrix.arch }}
+        shell: bash
         run: |
-          # Extract version from the pushed tag (refs/tags/vX.Y.Z)
+          # Extract raw ref name (e.g., v0.2.1-alpha)
           RAW="${GITHUB_REF##*/}"
+          # Strip leading 'v' (optional) and any accidental leading dot
           VER="${RAW#v}"
-          echo "VER=$VER" >> $GITHUB_OUTPUT
-          echo "IMAGE_AMD=ghcr.io/filmgarage/amd64-addon-shellyman:$VER" >> $GITHUB_OUTPUT
-          echo "IMAGE_ARM=ghcr.io/filmgarage/aarch64-addon-shellyman:$VER" >> $GITHUB_OUTPUT
-          echo "IMAGE_AMD_LATEST=ghcr.io/filmgarage/amd64-addon-shellyman:latest" >> $GITHUB_OUTPUT
-          echo "IMAGE_ARM_LATEST=ghcr.io/filmgarage/aarch64-addon-shellyman:latest" >> $GITHUB_OUTPUT
+          VER="${VER#.}"
+          # Basic sanitization: allow [A-Za-z0-9_.-]
+          if [[ ! "$VER" =~ ^[A-Za-z0-9_.-]+$ ]]; then
+            echo "Invalid version string after parsing: '$VER'"
+            exit 1
+          fi
+          if [ -z "$VER" ]; then
+            echo "Version string empty after parsing"
+            exit 1
+          fi
+          echo "Using version: $VER"
+          IMAGE="ghcr.io/filmgarage/${ARCH}-addon-shellyman:${VER}"
+          IMAGE_LATEST="ghcr.io/filmgarage/${ARCH}-addon-shellyman:latest"
+          echo "IMAGE=$IMAGE" >> $GITHUB_OUTPUT
+          echo "IMAGE_LATEST=$IMAGE_LATEST" >> $GITHUB_OUTPUT
 
       - name: Build & Push (${{ matrix.arch }})
         uses: docker/build-push-action@v6
@@ -54,7 +68,7 @@ jobs:
           platforms: linux/${{ matrix.arch }}
           push: true
           tags: |
-            ${{ matrix.arch == 'amd64' && steps.meta.outputs.IMAGE_AMD || steps.meta.outputs.IMAGE_ARM }}
-            ${{ matrix.arch == 'amd64' && steps.meta.outputs.IMAGE_AMD_LATEST || steps.meta.outputs.IMAGE_ARM_LATEST }}
+            ${{ steps.meta.outputs.IMAGE }}
+            ${{ steps.meta.outputs.IMAGE_LATEST }}
           cache-from: type=registry,ref=ghcr.io/filmgarage/cache-shellyman:${{ matrix.arch }}
           cache-to: type=registry,ref=ghcr.io/filmgarage/cache-shellyman:${{ matrix.arch }},mode=max
